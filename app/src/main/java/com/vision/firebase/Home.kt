@@ -21,7 +21,7 @@ class Home : AppCompatActivity() {
     }
 
     private fun logout() {
-        FirebaseAuth.getInstance().signOut()
+        auth.signOut()
         Toast.makeText(this,"Log-Out Successful",Toast.LENGTH_LONG).show()
         startActivity(Intent(this,MainActivity::class.java))
         finish()

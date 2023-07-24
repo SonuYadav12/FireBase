@@ -1,5 +1,6 @@
 package com.vision.firebase
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
@@ -8,11 +9,14 @@ import android.view.MotionEvent
 import android.widget.EditText
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 import com.vision.firebase.databinding.ActivitySignUpBinding
 
 class SignUp : AppCompatActivity() {
     private lateinit var binding: ActivitySignUpBinding
     private lateinit var auth: FirebaseAuth
+    private lateinit var database: FirebaseDatabase
     private var isPasswordVisible = false
     private var isConfirmVisible = false
 
@@ -34,6 +38,7 @@ class SignUp : AppCompatActivity() {
         }
 
         auth = FirebaseAuth.getInstance()
+        database= FirebaseDatabase.getInstance()
 
         binding.google.setOnClickListener {
             // Implement Google Sign In functionality if needed
@@ -91,12 +96,18 @@ class SignUp : AppCompatActivity() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Sign up success,
-                    val user = auth.currentUser
+                    val userId = auth.currentUser?.uid
+                    if (userId != null) {
+                        val userRef = database.getReference("users").child(userId)
+                        userRef.child("email").setValue(email)
+                        userRef.child("password").setValue(password)
+                        userRef.child("registrationDate").setValue(ServerValue.TIMESTAMP)
+
+                    }
                     Toast.makeText(this, "Sign up successful!", Toast.LENGTH_SHORT).show()
-                    // You can navigate to the next screen or perform any other required actions here
+                    startActivity(Intent(this,Login::class.java))
                 } else {
-                    // If sign up fails, display a message to the user.
+                  
                     Toast.makeText(this, "Sign up failed. Please try again.", Toast.LENGTH_SHORT).show()
                 }
             }
