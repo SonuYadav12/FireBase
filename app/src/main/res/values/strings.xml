@@ -12,4 +12,5 @@
     <string name="checking">checking</string>
     <string name="todo3">TODO</string>
     <string name="todo4">TODO</string>
+    <string name="login_with_google">Login with google</string>
 </resources>
