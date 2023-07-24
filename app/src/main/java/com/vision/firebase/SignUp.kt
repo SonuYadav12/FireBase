@@ -107,7 +107,7 @@ class SignUp : AppCompatActivity() {
                     Toast.makeText(this, "Sign up successful!", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this,Login::class.java))
                 } else {
-                  
+
                     Toast.makeText(this, "Sign up failed. Please try again.", Toast.LENGTH_SHORT).show()
                 }
             }

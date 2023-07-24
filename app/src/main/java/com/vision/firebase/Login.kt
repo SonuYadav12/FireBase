@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.widget.EditText
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.vision.firebase.databinding.ActivityLoginBinding
 
 class Login : AppCompatActivity() {
@@ -62,10 +63,16 @@ class Login : AppCompatActivity() {
 
 
     private fun signInWithEmailAndPassword(email: String, password: String) {
+
               auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
-                  Toast.makeText(this,"LoginSuccessfull",Toast.LENGTH_LONG).show()
-                  startActivity(Intent(this,Home::class.java))
-                  finish()
+                  val user: FirebaseUser? =auth.currentUser
+                  if(user?.email==email) {
+                      if (user != null && user.email?.trim() == email.trim()) {
+                          Toast.makeText(this, "Login Successful", Toast.LENGTH_LONG).show()
+                          startActivity(Intent(this, Home::class.java))
+                          finish()
+                  }
               }
     }
+              }
 }
