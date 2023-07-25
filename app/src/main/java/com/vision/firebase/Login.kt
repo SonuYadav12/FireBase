@@ -24,6 +24,12 @@ class Login : AppCompatActivity() {
         setContentView(binding.root)
         auth=FirebaseAuth.getInstance()
 
+
+        binding.register.setOnClickListener {
+            startActivity(Intent(this,SignUp::class.java))
+            finish()
+        }
+
         binding.signup.setOnClickListener {
             signInWithEmailAndPassword(binding.email.text.toString(),binding.password.text.toString())
         }
@@ -33,7 +39,10 @@ class Login : AppCompatActivity() {
             handlePasswordToggle(event, binding.password)
             true
         }
+
     }
+
+
 
 
     private fun handlePasswordToggle(event: MotionEvent, editText: EditText) {
@@ -63,16 +72,41 @@ class Login : AppCompatActivity() {
 
 
     private fun signInWithEmailAndPassword(email: String, password: String) {
+        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val user: FirebaseUser? = auth.currentUser
+                if (user != null) {
+                    val userEmail = user.email
+                    if (userEmail != null && userEmail.trim() == email.trim() && user.isEmailVerified) {
+                        // Authentication successful, and the user's email and password match the provided credentials.
+                        Toast.makeText(this, "Login Successful", Toast.LENGTH_LONG).show()
+                        startActivity(Intent(this, Home::class.java))
+                        finish()
+                    } else {
+                        // Authentication successful, but the user's email or email verification status does not match the provided credentials.
+                        if (!user.isEmailVerified) {
+                            Toast.makeText(this, "Please verify your email address before logging in.", Toast.LENGTH_LONG).show()
 
-              auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
-                  val user: FirebaseUser? =auth.currentUser
-                  if(user?.email==email) {
-                      if (user != null && user.email?.trim() == email.trim()) {
-                          Toast.makeText(this, "Login Successful", Toast.LENGTH_LONG).show()
-                          startActivity(Intent(this, Home::class.java))
-                          finish()
-                  }
-              }
+                            user?.sendEmailVerification()
+                                ?.addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        // Verification email sent successfully
+                                        Toast.makeText(this, "Verification email sent.", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        // Failed to send verification email
+                                        Toast.makeText(this, "Failed to send verification email.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                        } else {
+                            Toast.makeText(this, "Incorrect email or password.", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            } else {
+                // Authentication failed. Show an error message or handle the failure accordingly.
+                Toast.makeText(this, "Authentication failed. Please try again.", Toast.LENGTH_LONG).show()
+            }
+        }
     }
-              }
+
 }

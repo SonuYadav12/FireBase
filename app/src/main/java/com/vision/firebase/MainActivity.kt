@@ -19,11 +19,11 @@ class MainActivity : AppCompatActivity() {
 //
         binding.button.setOnClickListener {
             startActivity(Intent(this,SignUp::class.java))
-            finish()
+
         }
 
         binding.button2.setOnClickListener {
-            val userId = auth.currentUser
+//            val userId = auth.currentUser?.uid
 //            if (userId != null) {
 //               startActivity(Intent(this,Home::class.java))
 //                finish()

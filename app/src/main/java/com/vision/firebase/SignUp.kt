@@ -1,14 +1,22 @@
 package com.vision.firebase
 
+import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.view.MotionEvent
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ServerValue
 import com.vision.firebase.databinding.ActivitySignUpBinding
@@ -19,6 +27,7 @@ class SignUp : AppCompatActivity() {
     private lateinit var database: FirebaseDatabase
     private var isPasswordVisible = false
     private var isConfirmVisible = false
+    private lateinit var googleSignInClient: GoogleSignInClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,10 +47,17 @@ class SignUp : AppCompatActivity() {
         }
 
         auth = FirebaseAuth.getInstance()
-        database= FirebaseDatabase.getInstance()
+        database = FirebaseDatabase.getInstance()
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
 
         binding.google.setOnClickListener {
-            // Implement Google Sign In functionality if needed
+            val signInClient = googleSignInClient.signInIntent
+            launcher.launch(signInClient)
         }
 
         // The below code is for sign up using the email and password
@@ -53,7 +69,8 @@ class SignUp : AppCompatActivity() {
             if (email.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
                 Toast.makeText(this, "Fields cannot be empty", Toast.LENGTH_LONG).show()
             } else if (pass.length < 6) {
-                Toast.makeText(this, "Password cannot be less than 6 characters", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Password cannot be less than 6 characters", Toast.LENGTH_LONG)
+                    .show()
             } else if (pass != confirm) {
                 Toast.makeText(this, "Passwords do not match", Toast.LENGTH_LONG).show()
             } else {
@@ -105,10 +122,56 @@ class SignUp : AppCompatActivity() {
 
                     }
                     Toast.makeText(this, "Sign up successful!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this,Login::class.java))
+                    startActivity(Intent(this, Login::class.java))
                 } else {
 
-                    Toast.makeText(this, "Sign up failed. Please try again.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Sign up failed. Please try again.", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+    }
+
+
+    private var launcher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+        { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                if (task.isSuccessful) {
+                    val account: GoogleSignInAccount? = task.result
+                    val credential = GoogleAuthProvider.getCredential(account?.idToken, null)
+                    signInWithGoogle(credential)
+                }
+            } else {
+                Toast.makeText(this, "Failed Try Again", Toast.LENGTH_LONG).show()
+            }
+        }
+
+    private fun signInWithGoogle(credential: AuthCredential) {
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    val user = auth.currentUser
+                    if (user != null) {
+                        val userId = user.uid
+                        val email = user.email
+                        // You can save user information to Firebase Realtime Database here
+                        val userRef = database.getReference("users").child(userId)
+                        userRef.child("email").setValue(email)
+                        userRef.child("registrationDate").setValue(ServerValue.TIMESTAMP)
+
+                        Toast.makeText(this, "Sign in with Google successful!", Toast.LENGTH_SHORT)
+                            .show()
+                        startActivity(Intent(this, Home::class.java))
+                    }
+                } else {
+                    // If sign in fails, display a message to the user
+                    Toast.makeText(
+                        this,
+                        "Sign in with Google failed. Please try again.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
     }

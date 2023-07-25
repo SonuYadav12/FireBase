@@ -4,6 +4,8 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.vision.firebase.databinding.ActivityHomeBinding
 
@@ -21,7 +23,11 @@ class Home : AppCompatActivity() {
     }
 
     private fun logout() {
-        auth.signOut()
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        GoogleSignIn.getClient(this,gso).signOut()
         Toast.makeText(this,"Log-Out Successful",Toast.LENGTH_LONG).show()
         startActivity(Intent(this,MainActivity::class.java))
         finish()

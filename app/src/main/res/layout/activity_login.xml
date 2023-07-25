@@ -85,22 +85,18 @@
         app:layout_constraintTop_toBottomOf="@+id/password"
         app:layout_constraintVertical_bias="0.707" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/google"
+    <TextView
+        android:id="@+id/register"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="130dp"
-        android:background="#fff"
-        android:drawableStart="@drawable/google"
-        android:padding="10dp"
-        android:text="@string/login_with_google"
-        android:textColor="#757575"
+        android:layout_marginBottom="84dp"
+        android:text="@string/don_t_have_one_register"
+        android:textSize="15sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signup" />
+        app:layout_constraintStart_toStartOf="parent" />
+
+    \
 
 </androidx.constraintlayout.widget.ConstraintLayout>

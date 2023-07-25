@@ -14,4 +14,5 @@
     <string name="todo4">TODO</string>
     <string name="login_with_google">Login with google</string>
     <string name="log_out">Log Out</string>
+    <string name="don_t_have_one_register">Don\'t Have One ? Register</string>
 </resources>
